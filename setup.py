@@ -18,7 +18,7 @@ setuptools.setup(
     name="eazyvizy",
     version=version,
     author="Jatalocks",
-    description="A tiny framework for exposing python scripts as parameterized web apps",
+    description="An easy cloud visualizer",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/jatalocks/eazyvizy",
