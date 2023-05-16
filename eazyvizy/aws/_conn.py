@@ -85,6 +85,7 @@ class EazyVizyAWS(EazyVizy):
                 shapeProperties={
                     "size": 30
                 },
+                group=vpc.id,
                 image="https://static-00.iconduck.com/assets.00/networkingcontentdelivery-amazonvpc-internetgateway-icon-491x512-g9bp4hsr.png",
                 imagePadding=10,
                 vpcId=vpc.id,
@@ -109,6 +110,7 @@ class EazyVizyAWS(EazyVizy):
                                 "size": 30
                             },
                             label=node_label,
+                            group=other_vpc.id,
                             shape="circularImage",
                             image="https://static-00.iconduck.com/assets.00/networkingcontentdelivery-amazonvpc-internetgateway-icon-491x512-g9bp4hsr.png",
                             imagePadding=8,
@@ -124,32 +126,38 @@ class EazyVizyAWS(EazyVizy):
                                 self.add_node(
                                     id=f"{sec['id']}-{level}",
                                     shapeProperties={
-                                        "size": 20
+                                        "size": 30
                                     },
                                     label=sec['id'],
                                     shape="circularImage",
+                                    group=vpc.id,
                                     image="https://www.cloudoptics.io/wp-content/uploads/2015/03/aws_sg.png",
                                     secrutiyGroupId=sec['id'],
                                     region=region,
                                     # level=level,
-                                )         
+                                )       
                                 if {
                                         "source": f"{vpc.id}-{level}",
                                         "to": f"{sec['id']}-{level}",
-                                    } not in edges_to_add:                   
+                                    } not in edges_to_add:  
                                     edges_to_add.append(
                                         {
                                             "source": f"{vpc.id}-{level}",
                                             "to": f"{sec['id']}-{level}",
                                         }
-                                    )                                
-                                edges_to_add.append(
-                                    {
+                                    )              
+                                if {
                                         "source": f"{sec['id']}-{level}",
                                         "to": f"{other_vpc.id}-{level}",
                                         "label": sec['port'],
-                                    }
-                                )
+                                    } not in edges_to_add:                  
+                                    edges_to_add.append(
+                                        {
+                                            "source": f"{sec['id']}-{level}",
+                                            "to": f"{other_vpc.id}-{level}",
+                                            "label": sec['port'],
+                                        }
+                                    )
                         else:
                             # Routing Only
                             edges_to_add.append(
@@ -169,6 +177,7 @@ class EazyVizyAWS(EazyVizy):
                                     "size": 20
                                 },
                                 label=sec['id'],
+                                group=vpc.id,
                                 shape="circularImage",
                                 image="https://www.cloudoptics.io/wp-content/uploads/2015/03/aws_sg.png",
                                 secrutiyGroupId=sec['id'],
@@ -193,7 +202,10 @@ class EazyVizyAWS(EazyVizy):
                             )
 
             # Add all the edges to the graph
+            alreadyAdded = []
             for edge_data in edges_to_add:
-                self.add_edge(**edge_data)
+                if edge_data not in alreadyAdded:
+                    self.add_edge(**edge_data)
+                    alreadyAdded.append(edge_data)
 
             level += 1

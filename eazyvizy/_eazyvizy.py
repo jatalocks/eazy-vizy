@@ -19,7 +19,7 @@ class EazyVizy:
             "node": {"physics": False},
             "physics": {
                 "barnesHut": {
-                    "centralGravity": 0.15,
+                    "centralGravity": 0.2,
                     "springLength": 115,
                     "avoidOverlap": 1,
                 },
@@ -37,7 +37,7 @@ class EazyVizy:
         self.graph.add_edge(**kwargs)
 
     def get_options(self):
-        return json.dumps(self.options)
+        return str(self.options)
 
     def set_option(self, key, value):
         self.options[key] = value
@@ -46,4 +46,5 @@ class EazyVizy:
         return self.options
 
     def generate_html(self, name="example.html"):
+        self.graph.set_options(self.get_options())
         self.graph.show(name)
