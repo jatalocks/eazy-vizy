@@ -2,40 +2,39 @@ from pyvis.network import Network
 import json
 import boto3
 from .logger import ConsoleLogger
+
+
 class EazyVizy:
     logger = ConsoleLogger()
+    graph = Network(directed=True, filter_menu=True)
 
     def __init__(self):
-        self.graph = Network(directed=True, filter_menu=True)
         self.options = {
             "configure": {
                 "enabled": True,
                 "filter": "physics, layout",
-                "showButton": True
+                "showButton": True,
             },
-            "edges": {
-                "smooth": False
-            },
-            "node": {
-                "physics": False
-            },
+            "edges": {"smooth": False},
+            "node": {"physics": False},
             "physics": {
                 "barnesHut": {
                     "centralGravity": 0.15,
                     "springLength": 115,
-                    "avoidOverlap": 1
+                    "avoidOverlap": 1,
                 },
-                "minVelocity": 0.75
-            }
+                "minVelocity": 0.75,
+            },
         }
 
-    def add_node(self, node_id, node_label, **kwargs):
-        self.logger.color("Adding Node","blue")
-        self.graph.add_node(node_id, node_label, **kwargs)
+    def add_node(self, **kwargs):
+        print("Adding Node")
+        id = kwargs.pop("id")
+        self.graph.add_node(id, **kwargs)
 
-    def add_edge(self, source, target, **kwargs):
-        self.logger.color("Adding Edge","green")
-        self.graph.add_edge(source, target, **kwargs)
+    def add_edge(self, **kwargs):
+        print("Adding Edge")
+        self.graph.add_edge(**kwargs)
 
     def get_options(self):
         return json.dumps(self.options)
