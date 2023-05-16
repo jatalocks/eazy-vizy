@@ -3,7 +3,6 @@ import yaml
 import re
 from shutil import get_terminal_size
 from threading import Event, Thread
-
 # from .._request import RequestState
 
 # From cli-spinners (https://www.npmjs.com/package/cli-spinners)

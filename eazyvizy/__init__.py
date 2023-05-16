@@ -5,5 +5,5 @@
 """Python Package Template"""
 from __future__ import annotations
 from ._version import __version__
-from ._main import main, run
+from ._main import main
 from .decorators import endpoint
