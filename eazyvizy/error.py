@@ -11,8 +11,8 @@ exceptions, including:
 
 The package defines several constants:
 
-- NO_TEMPLE: exit code indicating that no requests eazyvizy file was provided.
-- INVALID_TEMPLE: exit code indicating that a requests eazyvizy file was invalid.
+- NO_EAZYVIZY: exit code indicating that no requests eazyvizy file was provided.
+- INVALID_EAZYVIZY: exit code indicating that a requests eazyvizy file was invalid.
 - INTERRUPTED: exit code indicating that the user interrupted the program.
 - UNKNOWN_ERROR: exit code indicating an unexpected error occurred.
 
@@ -21,9 +21,9 @@ a message instructing the user to create a bug report on the package's GitHub
 repository.
 """
 # pylint: disable=redefined-builtin
-NO_TEMPLE = 251
+NO_EAZYVIZY = 251
 NO_SCRIPT = 252
-INVALID_TEMPLE = 253
+INVALID_EAZYVIZY = 253
 INTERRUPTED = 254
 UNKNOWN_ERROR = 255
 
@@ -59,9 +59,9 @@ class NoEazyVizyError(EazyVizyError):
 
     def __init__(self, path=None):
         if not path:
-            super().__init__("No requests eazyvizy file provided.", NO_TEMPLE)
+            super().__init__("No requests eazyvizy file provided.", NO_EAZYVIZY)
         else:
-            super().__init__(f"Did not find eazyvizy file in {path}.", NO_TEMPLE)
+            super().__init__(f"Did not find eazyvizy file in {path}.", NO_EAZYVIZY)
 
 
 class NoScriptError(EazyVizyError):
@@ -88,7 +88,7 @@ class InvalidEazyVizyError(EazyVizyError):
     """
 
     def __init__(self, message):
-        super().__init__(message, INVALID_TEMPLE)
+        super().__init__(message, INVALID_EAZYVIZY)
 
 
 class InterruptedError(EazyVizyError):

@@ -30,7 +30,7 @@ from .error import (
     InterruptedError,
     InvalidEazyVizyError,
     EazyVizyError,
-    # INVALID_TEMPLE,
+    # INVALID_EAZYVIZY,
     UNKNOWN_ERROR,
     UNKNOWN_ERROR_MSG,
 )
