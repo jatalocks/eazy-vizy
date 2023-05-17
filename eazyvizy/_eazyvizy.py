@@ -12,32 +12,37 @@ class EazyVizy:
         self.options = {
             "configure": {
                 "enabled": True,
-                "filter": "physics, layout",
+                "filter": "physics, edges",
                 "showButton": True,
             },
             "edges": {"smooth": False},
             "node": {"physics": False},
             "physics": {
-                "barnesHut": {
-                    "centralGravity": 0.2,
-                    "springLength": 115,
+                "hierarchicalRepulsion": {
+                    "springLength": 235,
+                    "springConstant": 0.1,
+                    "nodeDistance": 100,
+                    "damping": 0.3,
                     "avoidOverlap": 1,
                 },
                 "minVelocity": 0.75,
+                "solver": "hierarchicalRepulsion",
             },
         }
 
     def add_node(self, **kwargs):
-        print("Adding Node")
         id = kwargs.pop("id")
         self.graph.add_node(id, **kwargs)
 
     def add_edge(self, **kwargs):
-        print("Adding Edge")
         self.graph.add_edge(**kwargs)
 
+    def add_edges(self, edges):
+        for edge in edges:
+            self.graph.add_edge(**edge)
+
     def get_options(self):
-        return str(self.options)
+        return json.dumps(self.options)
 
     def set_option(self, key, value):
         self.options[key] = value
