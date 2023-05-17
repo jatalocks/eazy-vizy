@@ -16,7 +16,7 @@ class EazyVizy:
                 "showButton": True,
             },
             "edges": {"smooth": False},
-            "node": {"physics": False},
+            # "node": {"physics": False},
             "physics": {
                 "hierarchicalRepulsion": {
                     "springLength": 235,
