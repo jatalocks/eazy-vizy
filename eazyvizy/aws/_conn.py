@@ -49,7 +49,15 @@ class EazyVizyAWS(EazyVizy):
                 if r.destination_cidr_block != "local" and ipaddr.IPNetwork(
                     target_cidr
                 ).overlaps(ipaddr.IPNetwork(r.destination_cidr_block)):
-                    routeList.append({"id": t.id,"type":type,"assoc_id":r.transit_gateway_id or r.vpc_peering_connection_id or ""})
+                    routeList.append(
+                        {
+                            "id": t.id,
+                            "type": type,
+                            "assoc_id": r.transit_gateway_id
+                            or r.vpc_peering_connection_id
+                            or "",
+                        }
+                    )
         return routeList
 
     def has_security_group_rule_with_cidr(self, vpc, target_vpc):
@@ -77,8 +85,7 @@ class EazyVizyAWS(EazyVizy):
             )
         loop.run_until_complete(looper)
 
-
-    def add_vpc(self, vpc, region):
+    def add_vpc(self, vpc, region, level):
         vpc_metadata = {"shape": "circularImage", "vpcId": vpc.id, "region": region}
         node_label = vpc.id
         if vpc.tags:
@@ -86,70 +93,157 @@ class EazyVizyAWS(EazyVizy):
                 if tag.get("Key") == "Name":
                     node_label = tag["Value"]
                     break
-        self.add_node(id=vpc.id, label=node_label, 
-        image="https://static-00.iconduck.com/assets.00/networkingcontentdelivery-amazonvpc-internetgateway-icon-491x512-g9bp4hsr.png", 
-        **vpc_metadata, size=30, scaling={"min": 30, "max": 30})
-    
-    def add_route_table(self, rtable,vpc, region):
+        self.add_node(
+            id=vpc.id,
+            label=node_label,
+            level=level,
+            image="https://static-00.iconduck.com/assets.00/networkingcontentdelivery-amazonvpc-internetgateway-icon-491x512-g9bp4hsr.png",
+            **vpc_metadata,
+            size=30,
+            scaling={"min": 30, "max": 30}
+        )
+
+    def add_route_table(self, rtable, vpc, region, level):
         vpc_metadata = {"shape": "circularImage", "vpcId": vpc.id, "region": region}
-        self.add_node(id=rtable["id"], label=rtable["id"], 
-        image="https://symbols.getvecta.com/stencil_20/8_customer-gateway.5f8e151d08.jpg", 
-        **vpc_metadata, size=15, scaling={"min": 15, "max": 15})
+        self.add_node(
+            id=rtable["id"],
+            label=rtable["id"],
+            level=level,
+            image="https://symbols.getvecta.com/stencil_20/8_customer-gateway.5f8e151d08.jpg",
+            **vpc_metadata,
+            size=15,
+            scaling={"min": 15, "max": 15}
+        )
 
-    def add_tgw(self, tgw, region):
+    def add_tgw(self, tgw, region, level):
         vpc_metadata = {"shape": "circularImage", "region": region}
-        self.add_node(id=tgw, label=tgw, 
-        image="https://global-uploads.webflow.com/5f05d5858fab461d0d08eaeb/635a593ae410e66d0c8b8b00_transit_gateway_light.svg", 
-        **vpc_metadata, size=15, scaling={"min": 15, "max": 15})
+        self.add_node(
+            id=tgw,
+            label=tgw,
+            level=level,
+            image="https://global-uploads.webflow.com/5f05d5858fab461d0d08eaeb/635a593ae410e66d0c8b8b00_transit_gateway_light.svg",
+            **vpc_metadata,
+            size=15,
+            scaling={"min": 15, "max": 15}
+        )
 
-    def add_peering(self, add_peering, region):
+    def add_peering(self, add_peering, region, level):
         vpc_metadata = {"shape": "circularImage", "region": region}
-        self.add_node(id=add_peering, label=add_peering, 
-        image="https://symbols.getvecta.com/stencil_9/28_vpc-peering.735192d824.svg", 
-        **vpc_metadata, size=15, scaling={"min": 15, "max": 15})
+        self.add_node(
+            id=add_peering,
+            label=add_peering,
+            level=level,
+            image="https://symbols.getvecta.com/stencil_9/28_vpc-peering.735192d824.svg",
+            **vpc_metadata,
+            size=15,
+            scaling={"min": 15, "max": 15}
+        )
 
-    def add_aws_edge(self, source, target, color, dashed, ports):
+    def add_aws_edge(self, source, target, color, dashed, ports, level):
         if ports:
-            self.add_edge(**{
-                "source": source, 
-                "to": target, 
-                "title": str(ports), 
-                "arrows": {"to": {"enabled": True, "scaleFactor": 1, "type": "arrow"}, "middle": {"enabled": True, "imageHeight": 30, "imageWidth": 30, "scaleFactor": 1, "src": "https://www.cloudoptics.io/wp-content/uploads/2015/03/aws_sg.png", "type": "image"}, "from": {"enabled": True, "scaleFactor": 1, "type": "arrow"}}, 
-                "dashed": dashed, 
-                "color": color
-            })
+            self.add_edge(
+                **{
+                    "source": source,
+                    "to": target,
+                    "level": level,
+                    "title": str(ports),
+                    "arrows": {
+                        "to": {"enabled": True, "scaleFactor": 1, "type": "arrow"},
+                        "middle": {
+                            "enabled": True,
+                            "imageHeight": 30,
+                            "imageWidth": 30,
+                            "scaleFactor": 1,
+                            "src": "https://www.cloudoptics.io/wp-content/uploads/2015/03/aws_sg.png",
+                            "type": "image",
+                        },
+                        "from": {"enabled": True, "scaleFactor": 1, "type": "arrow"},
+                    },
+                    "dashed": dashed,
+                    "color": color,
+                }
+            )
         else:
-            self.add_edge(**{
-                "source": source, 
-                "to": target, 
-                "dashed": dashed, 
-                "color": color
-            })
+            self.add_edge(
+                **{
+                    "source": source,
+                    "to": target,
+                    "level": level,
+                    "dashed": dashed,
+                    "color": color,
+                }
+            )
 
     @background
     def test_vpcs_in_region(self, vpcs, region):
         r = lambda: random.randint(0, 255)
+        level = 0
         for vpc in vpcs:
             color = "#%02X%02X%02X" % (r(), r(), r())
-            self.add_vpc(vpc, region)
+            self.add_vpc(vpc, region, level)
             for other_vpc in vpcs:
                 if vpc.id != other_vpc.id:
-                    self.add_vpc(other_vpc, region)
+                    self.add_vpc(other_vpc, region, level)
                     ports = self.has_security_group_rule_with_cidr(vpc, other_vpc)
                     has_route = self.has_route_with_cidr(vpc, other_vpc.cidr_block)
                     if has_route:
                         for rtable in has_route:
-                            self.add_route_table(rtable,vpc,region)
-                            if rtable['type'] == 'TGW':
-                                self.add_tgw(rtable['assoc_id'],region)
-                                self.add_aws_edge(rtable['id'],rtable['assoc_id'],color,dashed=False,ports=ports)
-                                self.add_aws_edge(rtable['assoc_id'],other_vpc.id,color,dashed=False,ports=ports)
-                            elif rtable['type'] == 'Peering':
-                                self.add_peering(rtable['assoc_id'],region)
-                                self.add_aws_edge(vpc.id,rtable["id"],color,dashed=False,ports=ports)
-                                self.add_aws_edge(rtable["id"],other_vpc.id,color,dashed=False,ports=ports)
+                            self.add_route_table(rtable, vpc, region,level)
+                            if rtable["type"] == "TGW":
+                                self.add_tgw(rtable["assoc_id"], region, level=level)
+                                self.add_aws_edge(
+                                    rtable["id"],
+                                    rtable["assoc_id"],
+                                    color,
+                                    dashed=False,
+                                    ports=ports,
+                                    level=level,
+                                )
+                                self.add_aws_edge(
+                                    rtable["assoc_id"],
+                                    other_vpc.id,
+                                    color,
+                                    dashed=False,
+                                    ports=ports,
+                                    level=level,
+                                )
+                            elif rtable["type"] == "Peering":
+                                self.add_peering(rtable["assoc_id"], region, level)
+                                self.add_aws_edge(
+                                    vpc.id,
+                                    rtable["id"],
+                                    color,
+                                    dashed=False,
+                                    ports=ports,
+                                    level=level,
+                                )
+                                self.add_aws_edge(
+                                    rtable["id"],
+                                    other_vpc.id,
+                                    color,
+                                    dashed=False,
+                                    ports=ports,
+                                    level=level,
+                                )
                             else:
-                                self.add_aws_edge(vpc.id,rtable['id'],color,dashed=False,ports=ports)
-                                self.add_aws_edge(rtable['id'],other_vpc.id,color,dashed=False,ports=ports)
+                                self.add_aws_edge(
+                                    vpc.id,
+                                    rtable["id"],
+                                    color,
+                                    dashed=False,
+                                    ports=ports,
+                                    level=level,
+                                )
+                                self.add_aws_edge(
+                                    rtable["id"],
+                                    other_vpc.id,
+                                    color,
+                                    dashed=False,
+                                    ports=ports,
+                                    level=level,
+                                )
                     elif ports:
-                        self.add_aws_edge(vpc.id,other_vpc.id,color,dashed=True,ports=ports)
+                        self.add_aws_edge(
+                            vpc.id, other_vpc.id, color, dashed=True, ports=ports, level=level
+                        )
+        level+=1

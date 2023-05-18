@@ -12,7 +12,7 @@ class EazyVizy:
         self.options = {
             "configure": {
                 "enabled": True,
-                "filter": "physics, edges",
+                # "filter": "physics, edges",
                 "showButton": True,
             },
             "edges": {"smooth": False},
