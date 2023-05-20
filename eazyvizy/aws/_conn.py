@@ -27,7 +27,8 @@ class EazyVizyAWS(EazyVizy):
         try:
             self.session = session or Session()
         except BaseException as exc:
-            raise InvalidEazyVizyError("Could not initiate AWS connection.") from exc
+            raise InvalidEazyVizyError(
+                "Could not initiate AWS connection.") from exc
 
     def fetch_vpcs(self, region):
         return list(self.session.resource("ec2", region_name=region).vpcs.all())
@@ -71,7 +72,8 @@ class EazyVizyAWS(EazyVizy):
                         ):
                             if r.get("FromPort"):
                                 portList.append(
-                                    {"id": sg.id, "port": str(r.get("FromPort"))}
+                                    {"id": sg.id, "port": str(
+                                        r.get("FromPort"))}
                                 )
         return portList
 
@@ -85,8 +87,9 @@ class EazyVizyAWS(EazyVizy):
             )
         loop.run_until_complete(looper)
 
-    def add_vpc(self, vpc, region, level):
-        vpc_metadata = {"shape": "circularImage", "vpcId": vpc.id, "region": region}
+    def add_vpc(self, vpc, region, level,central=False):
+        vpc_metadata = {"shape": "circularImage",
+                        "vpcId": vpc.id, "region": region}
         node_label = vpc.id
         if vpc.tags:
             for tag in vpc.tags:
@@ -94,19 +97,27 @@ class EazyVizyAWS(EazyVizy):
                     node_label = tag["Value"]
                     break
         self.add_node(
-            id=vpc.id,
+            id=vpc.id+str(level),
             label=node_label,
             level=level,
+            group=vpc.id if central else None,
             image="https://static-00.iconduck.com/assets.00/networkingcontentdelivery-amazonvpc-internetgateway-icon-491x512-g9bp4hsr.png",
             **vpc_metadata,
-            size=30,
-            scaling={"min": 30, "max": 30}
+            size=25,
+            imagePadding={
+                "left": 5,
+                "top": 5,
+                "bottom": 5,
+                "right": 5
+            },
+            scaling={"min": 25, "max": 25}
         )
 
     def add_route_table(self, rtable, vpc, region, level):
-        vpc_metadata = {"shape": "circularImage", "vpcId": vpc.id, "region": region}
+        vpc_metadata = {"shape": "circularImage",
+                        "vpcId": vpc.id, "region": region}
         self.add_node(
-            id=rtable["id"],
+            id=rtable["id"]+str(level),
             label=rtable["id"],
             level=level,
             image="https://symbols.getvecta.com/stencil_20/8_customer-gateway.5f8e151d08.jpg",
@@ -118,7 +129,7 @@ class EazyVizyAWS(EazyVizy):
     def add_tgw(self, tgw, region, level):
         vpc_metadata = {"shape": "circularImage", "region": region}
         self.add_node(
-            id=tgw,
+            id=tgw+str(level),
             label=tgw,
             level=level,
             image="https://global-uploads.webflow.com/5f05d5858fab461d0d08eaeb/635a593ae410e66d0c8b8b00_transit_gateway_light.svg",
@@ -130,12 +141,12 @@ class EazyVizyAWS(EazyVizy):
     def add_peering(self, add_peering, region, level):
         vpc_metadata = {"shape": "circularImage", "region": region}
         self.add_node(
-            id=add_peering,
+            id=add_peering+str(level),
             label=add_peering,
             level=level,
             image="https://symbols.getvecta.com/stencil_9/28_vpc-peering.735192d824.svg",
             **vpc_metadata,
-            size=15,
+            size=20,
             scaling={"min": 15, "max": 15}
         )
 
@@ -143,8 +154,8 @@ class EazyVizyAWS(EazyVizy):
         if ports:
             self.add_edge(
                 **{
-                    "source": source,
-                    "to": target,
+                    "source": source+str(level),
+                    "to": target+str(level),
                     "level": level,
                     "title": str(ports),
                     "arrows": {
@@ -161,13 +172,14 @@ class EazyVizyAWS(EazyVizy):
                     },
                     "dashed": dashed,
                     "color": color,
+                    "width": 2,
                 }
             )
         else:
             self.add_edge(
                 **{
-                    "source": source,
-                    "to": target,
+                    "source": source+str(level),
+                    "to": target+str(level),
                     "level": level,
                     "dashed": dashed,
                     "color": color,
@@ -176,21 +188,25 @@ class EazyVizyAWS(EazyVizy):
 
     @background
     def test_vpcs_in_region(self, vpcs, region):
-        r = lambda: random.randint(0, 255)
+        def r(): return random.randint(0, 255)
         level = 0
         for vpc in vpcs:
-            color = "#%02X%02X%02X" % (r(), r(), r())
-            self.add_vpc(vpc, region, level)
+            # color = "#%02X%02X%02X" % (r(), r(), r())
+            color = None
+            self.add_vpc(vpc, region, level, central=True)
             for other_vpc in vpcs:
                 if vpc.id != other_vpc.id:
                     self.add_vpc(other_vpc, region, level)
-                    ports = self.has_security_group_rule_with_cidr(vpc, other_vpc)
-                    has_route = self.has_route_with_cidr(vpc, other_vpc.cidr_block)
+                    ports = self.has_security_group_rule_with_cidr(
+                        vpc, other_vpc)
+                    has_route = self.has_route_with_cidr(
+                        vpc, other_vpc.cidr_block)
                     if has_route:
                         for rtable in has_route:
-                            self.add_route_table(rtable, vpc, region,level)
+                            self.add_route_table(rtable, vpc, region, level)
                             if rtable["type"] == "TGW":
-                                self.add_tgw(rtable["assoc_id"], region, level=level)
+                                self.add_tgw(
+                                    rtable["assoc_id"], region, level=level)
                                 self.add_aws_edge(
                                     rtable["id"],
                                     rtable["assoc_id"],
@@ -208,7 +224,8 @@ class EazyVizyAWS(EazyVizy):
                                     level=level,
                                 )
                             elif rtable["type"] == "Peering":
-                                self.add_peering(rtable["assoc_id"], region, level)
+                                self.add_peering(
+                                    rtable["assoc_id"], region, level)
                                 self.add_aws_edge(
                                     vpc.id,
                                     rtable["id"],
@@ -244,6 +261,11 @@ class EazyVizyAWS(EazyVizy):
                                 )
                     elif ports:
                         self.add_aws_edge(
-                            vpc.id, other_vpc.id, color, dashed=True, ports=ports, level=level
+                            vpc.id,
+                            other_vpc.id,
+                            color,
+                            dashed=True,
+                            ports=ports,
+                            level=level,
                         )
-        level+=1
+            level += 1
